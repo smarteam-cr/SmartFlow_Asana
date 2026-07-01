@@ -55,7 +55,7 @@ describe('loadConfig', () => {
 
     const config = loadConfig();
 
-    expect(config.port).toBe(3000);
+    expect(config.port).toBe(3005);
     expect(config.asanaHubspotTagName).toBe('HubSpot');
     expect(config.asanaHubspotOwnerMap).toEqual({});
   });

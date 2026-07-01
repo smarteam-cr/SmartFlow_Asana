@@ -33,7 +33,7 @@ export function loadConfig() {
 
   return {
     appUrl: process.env.APP_URL || '',
-    port: Number(process.env.PORT) || 3000,
+    port: Number(process.env.PORT) || 3005,
 
     mongoUri: process.env.MONGO_URI,
     mongoDb: process.env.MONGO_DB,

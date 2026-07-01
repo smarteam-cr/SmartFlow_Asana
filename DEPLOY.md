@@ -156,7 +156,7 @@ docker compose -f docker-compose.prod.yml logs -f
 Verifica que la app responde:
 
 ```bash
-curl http://localhost:3000/
+curl http://localhost:3005/
 ```
 
 ---
@@ -176,7 +176,7 @@ Edita `/etc/caddy/Caddyfile`:
 
 ```
 tudominio.com {
-    reverse_proxy localhost:3000
+    reverse_proxy localhost:3005
 }
 ```
 

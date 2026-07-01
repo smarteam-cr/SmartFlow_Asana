@@ -6,7 +6,7 @@ import { buildApp } from './app.js';
 
 const config = {
   appUrl: 'https://app.example.com',
-  port: 3000,
+  port: 3005,
   hubspotToken: 'pat-test',
   hubspotStageAnalisis: 'qualifiedtobuy',
   hubspotStagePropuesta: 'presentationscheduled',

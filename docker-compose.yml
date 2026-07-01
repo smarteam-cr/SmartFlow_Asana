@@ -2,9 +2,9 @@ services:
   app:
     build: .
     ports:
-      - "3000:3000"
+      - "3005:3005"
     env_file: .env
     environment:
       MONGO_URI: mongodb://mongo:27017
       MONGO_DB: asana_hubspot
-      PORT: 3000
+      PORT: 3005

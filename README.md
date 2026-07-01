@@ -114,7 +114,7 @@ npm install
 
 ```env
 APP_URL=https://dominio-publico.com
-PORT=3000
+PORT=3005
 
 MONGO_URI=mongodb://localhost:27017
 MONGO_DB=nombre_base_datos

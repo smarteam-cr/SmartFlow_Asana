@@ -12,12 +12,12 @@ services:
     restart: unless-stopped
     ports:
       # Solo accesible desde localhost — nginx/Caddy maneja el tráfico externo
-      - "127.0.0.1:3000:3000"
+      - "127.0.0.1:3005:3005"
     env_file: /opt/tu-app/.env.production
     networks:
       - internal
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:3000/"]
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:3005/"]
       interval: 30s
       timeout: 10s
       retries: 3
