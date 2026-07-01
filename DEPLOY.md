@@ -26,7 +26,7 @@
 ### 1. Inicializar git
 
 ```bash
-cd "/mnt/c/Users/Chanchote/Desktop/CODEIntegración ASANA HUSBPOT"
+cd "/ruta/a/tu/proyecto"
 git init
 git add -A
 git commit -m "Initial commit"
