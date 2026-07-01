@@ -1,0 +1,28 @@
+# Environment files (contain secrets)
+.env
+.env.backup-*
+.env.production
+
+# Dependencies
+/node_modules/
+
+# IDE / local config
+.claude/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker production init scripts (contain passwords)
+docker/mongo-init-prod.js
+
+# Logs
+*.log
+
+# Docker build artifacts
+.dockerignore

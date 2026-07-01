@@ -1,0 +1,65 @@
+# ============================================
+# docker-compose.prod.yml — Producción
+# ============================================
+# Uso: docker compose -f docker-compose.prod.yml up -d
+# NOTA: Requiere archivo .env.production en /opt/tu-app/
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      # Solo accesible desde localhost — nginx/Caddy maneja el tráfico externo
+      - "127.0.0.1:3000:3000"
+    env_file: /opt/tu-app/.env.production
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    command: ["mongod", "--auth", "--wiredTigerCacheSizeGB", "0.25"]
+    volumes:
+      - mongo_data:/data/db
+      - ./docker/mongo-init-prod.js:/docker-entrypoint-initdb.d/init.js:ro
+    env_file: /opt/tu-app/.env.mongo
+    networks:
+      - internal
+    healthcheck:
+      test: |
+        mongosh --eval 'db.getSiblingDB("admin").runCommand({ping:1})' \
+          --quiet --authenticationDatabase admin \
+          -u $${MONGO_INITDB_ROOT_USERNAME} \
+          -p $${MONGO_INITDB_ROOT_PASSWORD}
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  mongo_data:
