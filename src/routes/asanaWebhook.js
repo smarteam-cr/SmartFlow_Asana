@@ -8,7 +8,7 @@ function getTaskGidFromEvent(event) {
 }
 
 export function registerAsanaWebhook(app, deps) {
-  const { config, asana, hubspot, operacionesVentasService, findSyncByAsanaTask, markSyncCompleted, saveLog } = deps;
+  const { asana, hubspot, operacionesVentasService, findSyncByAsanaTask, markSyncCompleted, saveLog } = deps;
 
   app.post('/asana-webhook', async (req, reply) => {
     const hookSecret = req.headers['x-hook-secret'];
@@ -71,7 +71,15 @@ export function registerAsanaWebhook(app, deps) {
         }
 
         if (sync.type === 'cuantificacion') {
-          await hubspot.updateDealStage(sync.hubspot_deal_id, config.hubspotStagePropuesta);
+          if (!sync.hubspot_target_stage) {
+            await saveLog('asana', 'warning', 'Sync sin etapa destino registrada, no se movió el negocio', 'cuantificacion_missing_target_stage', {
+              deal_id: sync.hubspot_deal_id,
+              asana_task_id: taskGid,
+            });
+            continue;
+          }
+
+          await hubspot.updateDealStage(sync.hubspot_deal_id, sync.hubspot_target_stage);
           await markSyncCompleted(sync.id);
           await saveLog('asana', 'success', 'Negocio movido a Propuesta en elaboración', 'cuantificacion_completed', {
             deal_id: sync.hubspot_deal_id,

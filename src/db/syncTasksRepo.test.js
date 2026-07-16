@@ -48,6 +48,20 @@ describe('syncTasksRepo', () => {
     expect(found.status).toBe('pending');
   });
 
+  it('stores and returns the recorded hubspot_target_stage', async () => {
+    await saveSyncTask(db, 'deal-gt', 'task-gt', 'cuantificacion', '1294745902');
+
+    const found = await findSyncByAsanaTask(db, 'task-gt');
+    expect(found.hubspot_target_stage).toBe('1294745902');
+  });
+
+  it('defaults hubspot_target_stage to null when not provided', async () => {
+    await saveSyncTask(db, 'deal-1b', 'task-1b', 'cuantificacion');
+
+    const found = await findSyncByAsanaTask(db, 'task-1b');
+    expect(found.hubspot_target_stage).toBeNull();
+  });
+
   it('reports existsSyncForDeal correctly', async () => {
     await saveSyncTask(db, 'deal-2', 'task-2', 'planos_despiece');
 

@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import Fastify from 'fastify';
 import { registerAsanaWebhook } from './asanaWebhook.js';
 
-const config = { hubspotStagePropuesta: 'presentationscheduled' };
+const config = {};
 
 function buildApp(overrides = {}) {
   const deps = {
@@ -99,13 +99,14 @@ describe('POST /asana-webhook', () => {
     expect(deps.operacionesVentasService.processTask).toHaveBeenCalledTimes(1);
   });
 
-  it('moves the deal to proposal stage when a cuantificacion task completes', async () => {
+  it('moves the deal to the proposal stage recorded on the sync when a cuantificacion task completes', async () => {
     const { app, deps } = buildApp({
       findSyncByAsanaTask: vi.fn().mockResolvedValue({
         id: 'sync-1',
         type: 'cuantificacion',
         status: 'pending',
         hubspot_deal_id: 'deal-1',
+        hubspot_target_stage: 'presentationscheduled',
       }),
     });
     deps.asana.getTask.mockResolvedValue({ data: { completed: true, name: 'Cuantificación' } });
@@ -118,6 +119,56 @@ describe('POST /asana-webhook', () => {
 
     expect(deps.hubspot.updateDealStage).toHaveBeenCalledWith('deal-1', 'presentationscheduled');
     expect(deps.markSyncCompleted).toHaveBeenCalledWith('sync-1');
+  });
+
+  it('moves a Guatemala-pipeline deal to its own proposal stage, not another pipeline\'s', async () => {
+    const { app, deps } = buildApp({
+      findSyncByAsanaTask: vi.fn().mockResolvedValue({
+        id: 'sync-gt',
+        type: 'cuantificacion',
+        status: 'pending',
+        hubspot_deal_id: 'deal-gt',
+        hubspot_target_stage: '1294745902',
+      }),
+    });
+    deps.asana.getTask.mockResolvedValue({ data: { completed: true, name: 'Cuantificación' } });
+
+    await app.inject({
+      method: 'POST',
+      url: '/asana-webhook',
+      payload: { events: [{ resource: { resource_type: 'task', gid: 'task-gt' }, action: 'changed' }] },
+    });
+
+    expect(deps.hubspot.updateDealStage).toHaveBeenCalledWith('deal-gt', '1294745902');
+  });
+
+  it('logs a warning and does not move the deal when the sync has no target stage recorded', async () => {
+    const { app, deps } = buildApp({
+      findSyncByAsanaTask: vi.fn().mockResolvedValue({
+        id: 'sync-legacy',
+        type: 'cuantificacion',
+        status: 'pending',
+        hubspot_deal_id: 'deal-legacy',
+        hubspot_target_stage: null,
+      }),
+    });
+    deps.asana.getTask.mockResolvedValue({ data: { completed: true, name: 'Cuantificación' } });
+
+    await app.inject({
+      method: 'POST',
+      url: '/asana-webhook',
+      payload: { events: [{ resource: { resource_type: 'task', gid: 'task-legacy' }, action: 'changed' }] },
+    });
+
+    expect(deps.hubspot.updateDealStage).not.toHaveBeenCalled();
+    expect(deps.markSyncCompleted).not.toHaveBeenCalled();
+    expect(deps.saveLog).toHaveBeenCalledWith(
+      'asana',
+      'warning',
+      expect.any(String),
+      'cuantificacion_missing_target_stage',
+      expect.objectContaining({ asana_task_id: 'task-legacy' }),
+    );
   });
 
   it('creates a completed HubSpot task when a planos_despiece task completes', async () => {

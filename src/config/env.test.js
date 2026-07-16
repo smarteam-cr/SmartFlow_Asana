@@ -59,4 +59,27 @@ describe('loadConfig', () => {
     expect(config.asanaHubspotTagName).toBe('HubSpot');
     expect(config.asanaHubspotOwnerMap).toEqual({});
   });
+
+  it('parses a single stage value into a one-item array', () => {
+    Object.assign(process.env, REQUIRED);
+    const config = loadConfig();
+
+    expect(config.hubspotStageAnalisis).toEqual(['qualifiedtobuy']);
+    expect(config.hubspotStageGanada).toEqual(['closedwon']);
+  });
+
+  it('parses comma-separated stage values into arrays, one id per pipeline', () => {
+    Object.assign(process.env, REQUIRED, {
+      HUBSPOT_STAGE_ANALISIS: 'qualifiedtobuy,1294745901',
+      HUBSPOT_STAGE_PROPUESTA: 'presentationscheduled,1294745902',
+      HUBSPOT_STAGE_GANADA: 'closedwon,1294745905',
+    });
+
+    const config = loadConfig();
+
+    expect(config.hubspotStageAnalisis).toEqual(['qualifiedtobuy', '1294745901']);
+    expect(config.hubspotStageGanada).toEqual(['closedwon', '1294745905']);
+    expect(config.hubspotStagePropuestaMap.get('qualifiedtobuy')).toBe('presentationscheduled');
+    expect(config.hubspotStagePropuestaMap.get('1294745901')).toBe('1294745902');
+  });
 });

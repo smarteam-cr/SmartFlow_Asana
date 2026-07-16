@@ -17,6 +17,13 @@ const REQUIRED_KEYS = [
   'ASANA_VENTAS_PROJECT_GID',
 ];
 
+function splitStageList(value) {
+  return value
+    .split(',')
+    .map((id) => id.trim())
+    .filter(Boolean);
+}
+
 export function loadConfig() {
   for (const key of REQUIRED_KEYS) {
     if (!process.env[key]) {
@@ -31,6 +38,16 @@ export function loadConfig() {
     asanaHubspotOwnerMap = {};
   }
 
+  // Cada pipeline de HubSpot tiene sus propios IDs de etapa; una etapa "lógica"
+  // (analisis/propuesta/ganada) puede tener varios IDs, uno por pipeline.
+  // Se emparejan por posición: el N-ésimo ID de ANALISIS corresponde al N-ésimo de PROPUESTA.
+  const hubspotStageAnalisis = splitStageList(process.env.HUBSPOT_STAGE_ANALISIS);
+  const hubspotStagePropuesta = splitStageList(process.env.HUBSPOT_STAGE_PROPUESTA);
+  const hubspotStageGanada = splitStageList(process.env.HUBSPOT_STAGE_GANADA);
+  const hubspotStagePropuestaMap = new Map(
+    hubspotStageAnalisis.map((id, i) => [id, hubspotStagePropuesta[i]]),
+  );
+
   return {
     appUrl: process.env.APP_URL || '',
     port: Number(process.env.PORT) || 3005,
@@ -39,9 +56,9 @@ export function loadConfig() {
     mongoDb: process.env.MONGO_DB,
 
     hubspotToken: process.env.HUBSPOT_TOKEN,
-    hubspotStageAnalisis: process.env.HUBSPOT_STAGE_ANALISIS,
-    hubspotStagePropuesta: process.env.HUBSPOT_STAGE_PROPUESTA,
-    hubspotStageGanada: process.env.HUBSPOT_STAGE_GANADA,
+    hubspotStageAnalisis,
+    hubspotStagePropuestaMap,
+    hubspotStageGanada,
 
     asanaToken: process.env.ASANA_TOKEN,
     asanaWorkspaceGid: process.env.ASANA_WORKSPACE_GID,

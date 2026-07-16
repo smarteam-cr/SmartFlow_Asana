@@ -30,7 +30,7 @@ export function registerAdminDebug(app, deps) {
     handler: async () => {
       const fakeDeal = {
         id: 'TEST-001',
-        properties: { dealname: 'Jorge Arauz Test', dealstage: config.hubspotStageAnalisis },
+        properties: { dealname: 'Jorge Arauz Test', dealstage: config.hubspotStageAnalisis[0] },
       };
       const asanaTask = await cuantificacionService.createCuantificacionTask(fakeDeal);
       const asanaTaskId = asanaTask.data?.gid ?? null;
@@ -67,14 +67,15 @@ export function registerAdminDebug(app, deps) {
         stage_ganada: config.hubspotStageGanada,
       });
 
-      if (currentStage === config.hubspotStageAnalisis) {
+      if (config.hubspotStageAnalisis.includes(currentStage)) {
         if (await existsSyncForDeal(String(dealId), 'cuantificacion')) {
           return { ok: false, message: 'Ya existe una tarea de cuantificación creada para este negocio', deal_id: dealId };
         }
 
         const asanaTask = await cuantificacionService.createCuantificacionTask(deal);
         const asanaTaskId = asanaTask.data?.gid ?? null;
-        await saveSyncTask(String(dealId), asanaTaskId, 'cuantificacion');
+        const targetStage = config.hubspotStagePropuestaMap.get(currentStage);
+        await saveSyncTask(String(dealId), asanaTaskId, 'cuantificacion', targetStage);
 
         return {
           ok: true,
@@ -85,7 +86,7 @@ export function registerAdminDebug(app, deps) {
         };
       }
 
-      if (currentStage === config.hubspotStageGanada) {
+      if (config.hubspotStageGanada.includes(currentStage)) {
         if (await existsSyncForDeal(String(dealId), 'planos_despiece')) {
           return { ok: false, message: 'Ya existe una tarea de planos de despiece creada para este negocio', deal_id: dealId };
         }

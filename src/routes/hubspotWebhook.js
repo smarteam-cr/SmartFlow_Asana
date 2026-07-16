@@ -29,7 +29,7 @@ export function registerHubspotWebhook(app, deps) {
       const deal = await hubspot.getDeal(String(dealId));
       const currentStage = deal.properties?.dealstage ?? null;
 
-      if (currentStage === config.hubspotStageAnalisis) {
+      if (config.hubspotStageAnalisis.includes(currentStage)) {
         if (await existsSyncForDeal(String(dealId), 'cuantificacion')) {
           await saveLog('hubspot', 'ignored', 'Ya existe tarea de cuantificación para este negocio', 'cuantificacion', { deal_id: dealId });
           continue;
@@ -43,12 +43,13 @@ export function registerHubspotWebhook(app, deps) {
           continue;
         }
 
-        await saveSyncTask(String(dealId), asanaTaskId, 'cuantificacion');
+        const targetStage = config.hubspotStagePropuestaMap.get(currentStage);
+        await saveSyncTask(String(dealId), asanaTaskId, 'cuantificacion', targetStage);
         await saveLog('hubspot', 'success', 'Tarea creada en Asana desde HubSpot', 'cuantificacion', { deal_id: dealId, asana_task_id: asanaTaskId });
         continue;
       }
 
-      if (currentStage === config.hubspotStageGanada) {
+      if (config.hubspotStageGanada.includes(currentStage)) {
         if (await existsSyncForDeal(String(dealId), 'planos_despiece')) {
           await saveLog('hubspot', 'ignored', 'Ya existe tarea de planos de despiece para este negocio', 'planos_despiece', { deal_id: dealId });
           continue;

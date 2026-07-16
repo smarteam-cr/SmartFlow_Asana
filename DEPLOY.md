@@ -96,9 +96,10 @@ APP_URL=https://tu-dominio.com
 MONGO_URI=mongodb://app_user:LA-CONTRASEÑA-DE-MONGO@mongo:27017/asana_hubspot?authSource=asana_hubspot
 MONGO_DB=asana_hubspot
 HUBSPOT_TOKEN=pat-...
-HUBSPOT_STAGE_ANALISIS=qualifiedtobuy
-HUBSPOT_STAGE_PROPUESTA=presentationscheduled
-HUBSPOT_STAGE_GANADA=closedwon
+# Un id por pipeline, separados por coma, mismo orden en las 3 variables (N-ésimo de ANALISIS <-> N-ésimo de PROPUESTA/GANADA)
+HUBSPOT_STAGE_ANALISIS=qualifiedtobuy,1294745901
+HUBSPOT_STAGE_PROPUESTA=presentationscheduled,1294745902
+HUBSPOT_STAGE_GANADA=closedwon,1294745905
 ASANA_TOKEN=...
 ASANA_WORKSPACE_GID=1201861044080787
 ASANA_PROJECT_GID=1216075129117158

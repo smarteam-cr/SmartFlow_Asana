@@ -6,6 +6,7 @@ function mapSyncDoc(doc) {
     hubspot_deal_id: doc.hubspot_deal_id ?? null,
     asana_task_id: doc.asana_task_id ?? null,
     hubspot_task_id: doc.hubspot_task_id ?? null,
+    hubspot_target_stage: doc.hubspot_target_stage ?? null,
     type: doc.type || 'cuantificacion',
     status: doc.status || 'pending',
     created_at: doc.created_at ?? null,
@@ -13,11 +14,12 @@ function mapSyncDoc(doc) {
   };
 }
 
-export async function saveSyncTask(db, dealId, asanaTaskId, type = 'cuantificacion') {
+export async function saveSyncTask(db, dealId, asanaTaskId, type = 'cuantificacion', targetStage = null) {
   await db.collection('sync_tasks').insertOne({
     hubspot_deal_id: dealId,
     asana_task_id: asanaTaskId,
     hubspot_task_id: null,
+    hubspot_target_stage: targetStage,
     type: type.trim() || 'cuantificacion',
     status: 'pending',
     created_at: new Date(),

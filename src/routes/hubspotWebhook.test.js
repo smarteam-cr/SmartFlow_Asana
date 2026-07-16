@@ -3,8 +3,12 @@ import Fastify from 'fastify';
 import { registerHubspotWebhook } from './hubspotWebhook.js';
 
 const config = {
-  hubspotStageAnalisis: 'qualifiedtobuy',
-  hubspotStageGanada: 'closedwon',
+  hubspotStageAnalisis: ['qualifiedtobuy', '1294745901'],
+  hubspotStageGanada: ['closedwon', '1294745905'],
+  hubspotStagePropuestaMap: new Map([
+    ['qualifiedtobuy', 'presentationscheduled'],
+    ['1294745901', '1294745902'],
+  ]),
 };
 
 function buildApp(overrides = {}) {
@@ -55,7 +59,28 @@ describe('POST /hubspot-webhook', () => {
     const res = await app.inject({ method: 'POST', url: '/hubspot-webhook', payload: { objectId: 'deal-1' } });
 
     expect(res.statusCode).toBe(200);
-    expect(deps.saveSyncTask).toHaveBeenCalledWith('deal-1', 'task-1', 'cuantificacion');
+    expect(deps.saveSyncTask).toHaveBeenCalledWith('deal-1', 'task-1', 'cuantificacion', 'presentationscheduled');
+  });
+
+  it('creates a cuantificacion task when the deal is in the Guatemala pipeline stage', async () => {
+    const { app, deps } = buildApp();
+    deps.hubspot.getDeal.mockResolvedValue({ id: 'deal-gt', properties: { dealstage: '1294745901' } });
+    deps.cuantificacionService.createCuantificacionTask.mockResolvedValue({ data: { gid: 'task-gt' } });
+
+    const res = await app.inject({ method: 'POST', url: '/hubspot-webhook', payload: { objectId: 'deal-gt' } });
+
+    expect(res.statusCode).toBe(200);
+    expect(deps.saveSyncTask).toHaveBeenCalledWith('deal-gt', 'task-gt', 'cuantificacion', '1294745902');
+  });
+
+  it('creates a planos_despiece task when the deal is in the Guatemala pipeline won stage', async () => {
+    const { app, deps } = buildApp();
+    deps.hubspot.getDeal.mockResolvedValue({ id: 'deal-gt-2', properties: { dealstage: '1294745905' } });
+    deps.planosService.createPlanosDespieceTask.mockResolvedValue({ data: { gid: 'task-gt-2' } });
+
+    await app.inject({ method: 'POST', url: '/hubspot-webhook', payload: { objectId: 'deal-gt-2' } });
+
+    expect(deps.saveSyncTask).toHaveBeenCalledWith('deal-gt-2', 'task-gt-2', 'planos_despiece');
   });
 
   it('skips creating a cuantificacion task if one already exists for the deal (idempotency)', async () => {
