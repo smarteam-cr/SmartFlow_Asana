@@ -20,7 +20,7 @@ Propuesta en elaboración.
 
   return asana.createTask({
     name: `Cuantificación - ${dealName}`,
-    assignee: config.asanaBreinerUserGid,
+    assignee: config.asanaCuantificacionAssigneeGid,
     workspace: config.asanaWorkspaceGid,
     projects: [config.asanaProjectGid],
     due_on: dueDate,

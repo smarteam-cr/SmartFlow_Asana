@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createCuantificacionTask } from './cuantificacion.js';
 
 const config = {
-  asanaBreinerUserGid: 'breiner-gid',
+  asanaCuantificacionAssigneeGid: 'breiner-gid',
   asanaWorkspaceGid: 'workspace-gid',
   asanaProjectGid: 'project-gid',
 };

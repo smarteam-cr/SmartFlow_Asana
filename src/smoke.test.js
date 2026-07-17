@@ -14,7 +14,7 @@ const config = {
   asanaToken: 'asana-test',
   asanaWorkspaceGid: '1',
   asanaProjectGid: '2',
-  asanaBreinerUserGid: '3',
+  asanaCuantificacionAssigneeGid: '3',
   asanaPlanosProjectGid: '4',
   asanaPlanosSectionGid: '5',
   asanaPlanosAssigneeGid: '6',
